@@ -1,0 +1,82 @@
+# Home Dashboard — example dashboard (Settings → Dashboards → ⋮ → Raw configuration editor)
+# Replace the entity IDs with yours, or open the card's visual editor and pick them there.
+# The floor-plan coordinates and walls below reproduce the original design (600 × 500 units).
+title: Acasă
+views:
+  - title: Acasă
+    path: home
+    icon: mdi:home
+    type: panel            # full width, best on the phone app and tablets
+    cards:
+      - type: custom:home-dashboard-card
+        # language: ro     # optional; default = your HA profile language
+        power_entity: sensor.house_consumption        # total house power (W or kW)
+        energy_entity: sensor.house_energy_total      # total_increasing kWh → hourly chart
+        # energy_today_entity: sensor.energy_today    # optional daily kWh sensor
+        # cost_entity: sensor.energy_cost_today       # optional; otherwise price × kWh
+        price: 1.10                                   # per kWh, in your HA currency
+        walls: design
+        scenes:
+          - entity: scene.good_morning
+            description: Lights on, bedroom stays dark, floors warm
+          - entity: scene.evening
+            description: Soft 30% lights, AC to 23°
+          - entity: scene.away
+            description: Everything off, heating on low
+          - entity: script.night
+            description: Dim hallway light, bedroom AC only
+        circuits:
+          - entity: sensor.lights_power
+            name: Lights
+          - entity: sensor.ac_power
+            name: AC
+          - entity: sensor.floor_heating_power
+            name: Floor heating
+          - entity: sensor.sockets_power
+            name: Sockets
+        rooms:
+          - name: Living Room
+            area: living_room
+            plan: { x: 226, y: 33, w: 213, h: 293 }
+            temperature: sensor.living_room_temperature
+            humidity: sensor.living_room_humidity
+            power: sensor.living_room_power
+            climate: climate.living_room_ac
+            lights:
+              - light.living_room_ceiling_spots
+              - light.living_room_sofa_lamp
+              - entity: light.living_room_tv_backlight
+                name: TV backlight
+          - name: Bedroom
+            area: bedroom
+            plan: { x: 14, y: 33, w: 212, h: 180 }
+            annex: { x: 14, y: 213, w: 108, h: 43 }
+            temperature: sensor.bedroom_temperature
+            humidity: sensor.bedroom_humidity
+            climate: climate.bedroom_ac
+            lights: [light.bedroom_ceiling, light.bedroom_bedside]
+          - name: Kitchen
+            area: kitchen
+            plan: { x: 216, y: 326, w: 267, h: 140 }
+            temperature: sensor.kitchen_temperature
+            floor_heating: climate.kitchen_floor
+            floor_temperature: sensor.kitchen_floor_temperature
+            lights: [light.kitchen_worktop, light.kitchen_island]
+          - name: Bathroom
+            area: bathroom
+            plan: { x: 14, y: 256, w: 108, h: 156 }
+            temperature: sensor.bathroom_temperature
+            humidity: sensor.bathroom_humidity
+            floor_heating: climate.bathroom_floor
+            lights: [light.bathroom_mirror, light.bathroom_ceiling]
+          - name: Hallway
+            area: hallway
+            plan: { x: 122, y: 213, w: 94, h: 235 }
+            floor_heating: climate.hallway_floor
+            lights: [light.hallway_downlights]
+          - name: Loggia
+            area: loggia
+            plan: { x: 439, y: 87, w: 99, h: 239 }
+            annex: { x: 483, y: 326, w: 55, h: 100 }
+            temperature: sensor.loggia_temperature
+            lights: [light.loggia_strip]

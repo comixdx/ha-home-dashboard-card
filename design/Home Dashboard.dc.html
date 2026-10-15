@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; background:#0e1013; }
+  a { color:#e6b45c; text-decoration:none; }
+  a:hover { color:#f5cd85; }
+  input[type=range]{ -webkit-appearance:none; appearance:none; background:transparent; cursor:pointer; }
+  input[type=range]::-webkit-slider-runnable-track{ height:8px; border-radius:99px; background:rgba(255,255,255,0.14); }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:24px; height:24px; margin-top:-8px; border-radius:99px; background:#f0f2f5; border:none; box-shadow:0 2px 8px rgba(0,0,0,0.55); }
+  input[type=range]::-moz-range-track{ height:8px; border-radius:99px; background:rgba(255,255,255,0.14); }
+  input[type=range]::-moz-range-thumb{ width:24px; height:24px; border-radius:99px; background:#f0f2f5; border:none; }
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="min-height:100vh; background:#0e1013; color:#e9ecf1; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; padding:{{ pagePad }}; box-sizing:border-box; -webkit-tap-highlight-color:transparent;">
+<div style="max-width:1440px; margin:0 auto; display:flex; flex-direction:column; gap:{{ gap }};">
+
+  <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px 24px;">
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <div style="font-size:clamp(22px,6vw,28px); font-weight:600; letter-spacing:-0.02em;">{{ greeting }}</div>
+      <div style="font-size:14px; color:#9aa4b4;">{{ dateLabel }} · {{ clock }}</div>
+    </div>
+    <div style="display:flex; flex-wrap:wrap; align-items:center; gap:10px; flex:{{ fillFlex }};">
+      <div style="display:flex; flex:1 1 280px; background:#14171c; border:1px solid rgba(255,255,255,0.07); border-radius:14px;">
+        <div style="flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:4px; padding:10px 16px;">
+          <div style="font-size:12px; color:#9aa4b4;">Inside</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:500;">{{ avgTemp }}°</div>
+        </div>
+        <div style="flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:4px; padding:10px 16px; border-left:1px solid rgba(255,255,255,0.07);">
+          <div style="font-size:12px; color:#9aa4b4;">Lights on</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:500;">{{ lightsOn }}<span style="font-size:13px; color:#7d8697;"> of {{ lightsTotal }}</span></div>
+        </div>
+        <div style="flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:4px; padding:10px 16px; border-left:1px solid rgba(255,255,255,0.07);">
+          <div style="font-size:12px; color:#9aa4b4;">Using now</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:500; color:#e6b45c;">{{ totalPowerKw }}<span style="font-size:13px;"> kW</span></div>
+        </div>
+      </div>
+      <div onClick="{{ allLightsOff }}" style="flex:{{ fillFlex }}; box-sizing:border-box; display:flex; align-items:center; justify-content:center; height:52px; padding:0 20px; border-radius:14px; background:#191d23; border:1px solid rgba(255,255,255,0.1); font-size:14px; font-weight:500; cursor:pointer; user-select:none;" style-hover="background:#232830; border-color:rgba(230,180,92,0.5);">All lights off</div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:10px;">
+    <div style="font-size:15px; font-weight:600;">Quick scenes</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px;">
+      <sc-for list="{{ scenes }}" as="s" hint-placeholder-count="4">
+        <div onClick="{{ s.run }}" style="{{ s.style }}" style-hover="border-color:rgba(230,180,92,0.45);">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+            <div style="font-size:15px; font-weight:600;">{{ s.name }}</div>
+            <div style="font-size:12px; color:#e6b45c;">{{ s.badge }}</div>
+          </div>
+          <div style="font-size:13px; color:#9aa4b4; line-height:1.35;">{{ s.desc }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:{{ gridCols }}; grid-template-rows:{{ gridRows }}; grid-template-areas:{{ gridAreas }}; gap:{{ gap }}; align-items:start;">
+      <div style="grid-area:plan; min-width:0; background:#14171c; border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:{{ cardPad }};">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 16px; padding-bottom:16px;">
+          <div style="display:flex; flex-direction:column; gap:3px;">
+            <div style="font-size:17px; font-weight:600;">Your home</div>
+            <div style="font-size:13px; color:#9aa4b4;">Tap a room to control it</div>
+          </div>
+          <div style="display:flex; gap:4px; padding:4px; max-width:100%; box-sizing:border-box; overflow-x:auto; scrollbar-width:none; background:#0e1013; border-radius:12px;">
+            <div onClick="{{ setLayerLight }}" style="{{ tabLight }}">Lights</div>
+            <div onClick="{{ setLayerClimate }}" style="{{ tabClimate }}">Temperature</div>
+            <div onClick="{{ setLayerFloor }}" style="{{ tabFloor }}">Floor heating</div>
+            <div onClick="{{ setLayerPower }}" style="{{ tabPower }}">Energy</div>
+          </div>
+        </div>
+
+        <div style="position:relative; width:100%; padding-top:83.3%; background:#0e1013; overflow:hidden; border-radius:10px; container-type:inline-size;">
+          <sc-for list="{{ annexes }}" as="a" hint-placeholder-count="1">
+            <div onClick="{{ a.select }}" style="{{ a.style }}"></div>
+          </sc-for>
+          <sc-for list="{{ wallSegs }}" as="w" hint-placeholder-count="29">
+            <div style="{{ w.style }}"></div>
+          </sc-for>
+          <sc-for list="{{ rooms }}" as="r" hint-placeholder-count="6">
+            <div onClick="{{ r.select }}" style="{{ r.boxStyle }}">
+              <div style="font-size:clamp(9px,2.5cqw,14px); font-weight:600; letter-spacing:-0.01em; color:{{ r.ink }}; text-align:center; line-height:1.15;">{{ r.name }}</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:clamp(9px,2.3cqw,13px); font-weight:500; color:{{ r.inkSoft }}; text-align:center;">{{ r.metric }}</div>
+              <div style="display:flex; gap:4px; padding-top:3px;">
+                <sc-for list="{{ r.badges }}" as="bd" hint-placeholder-count="2">
+                  <div style="width:7px; height:7px; border-radius:99px; background:{{ bd.c }}; box-shadow:0 0 0 1px rgba(0,0,0,0.35);"></div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding-top:14px;">
+          <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:12px; color:#9aa4b4;">
+            <div style="display:flex; align-items:center; gap:6px;"><div style="width:8px; height:8px; border-radius:99px; background:#e6b45c;"></div>Lights on</div>
+            <div style="display:flex; align-items:center; gap:6px;"><div style="width:8px; height:8px; border-radius:99px; background:#6fa8dc;"></div>AC running</div>
+            <div style="display:flex; align-items:center; gap:6px;"><div style="width:8px; height:8px; border-radius:99px; background:#e08b5a;"></div>Floor heating on</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#7d8697;">
+            <div>{{ legendLow }}</div>
+            <div style="width:110px; height:8px; border-radius:99px; background:{{ legendGradient }};"></div>
+            <div>{{ legendHigh }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="grid-area:energy; min-width:0; background:#14171c; border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:{{ cardPad }};">
+        <div style="display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px 16px;">
+          <div style="font-size:17px; font-weight:600;">Energy today</div>
+          <div style="font-size:13px; color:#9aa4b4;">Busiest hour {{ peakPower }} W</div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:28px; padding-top:14px;">
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:500;">{{ kwhToday }}<span style="font-size:13px; color:#7d8697;"> kWh</span></div>
+            <div style="font-size:12px; color:#9aa4b4;">used so far</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:500;">€{{ costToday }}</div>
+            <div style="font-size:12px; color:#9aa4b4;">estimated cost</div>
+          </div>
+        </div>
+        <div style="position:relative; margin-top:18px; height:110px;">
+          <div style="position:absolute; inset:0; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none;">
+            <div style="border-top:1px dashed rgba(255,255,255,0.06);"></div>
+            <div style="border-top:1px dashed rgba(255,255,255,0.06);"></div>
+            <div style="border-top:1px solid rgba(255,255,255,0.1);"></div>
+          </div>
+          <div style="position:relative; display:flex; align-items:flex-end; gap:3px; height:100%;">
+            <sc-for list="{{ bars }}" as="b" hint-placeholder-count="24">
+              <div title="{{ b.tip }}" style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; height:100%;" style-hover="opacity:0.7;">
+                <div style="width:100%; border-radius:2px 2px 0 0; background:{{ b.color }}; height:{{ b.h }};"></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding-top:8px; font-size:11px; color:#7d8697;">
+          <div>Midnight</div><div>6 am</div><div>Noon</div><div>6 pm</div><div>Now</div>
+        </div>
+        <div style="font-size:13px; font-weight:600; padding-top:18px; padding-bottom:10px;">What's using power right now</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <sc-for list="{{ circuits }}" as="c" hint-placeholder-count="4">
+            <div style="display:grid; grid-template-columns:96px minmax(0,1fr) 60px; align-items:center; gap:12px;">
+              <div style="font-size:13px; color:#c2cad6;">{{ c.name }}</div>
+              <div style="height:8px; border-radius:99px; background:rgba(255,255,255,0.06); overflow:hidden;"><div style="height:100%; border-radius:99px; width:{{ c.share }}; background:{{ c.color }};"></div></div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:13px; text-align:right;">{{ c.w }} W</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+    <div ref="{{ roomRef }}" style="grid-area:room; min-width:0; background:#14171c; border:1px solid rgba(255,255,255,0.07); border-radius:18px; padding:{{ cardPad }}; display:flex; flex-direction:column; gap:20px; scroll-margin-top:8px;">
+      <div style="position:sticky; top:0; z-index:5; display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; background:#14171c; padding:6px 0;">
+        <sc-for list="{{ roomTabs }}" as="t" hint-placeholder-count="6">
+          <div onClick="{{ t.select }}" style="{{ t.style }}">
+            <div style="width:7px; height:7px; border-radius:99px; background:{{ t.dot }};"></div>
+            <div>{{ t.name }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px;">
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div style="font-size:24px; font-weight:600; letter-spacing:-0.02em;">{{ sel.name }}</div>
+          <div style="font-size:14px; color:#9aa4b4;">{{ sel.statusLine }}</div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:34px; font-weight:500; line-height:1;">{{ sel.temp }}°</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px; padding-top:18px; border-top:1px solid rgba(255,255,255,0.07);">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <div style="font-size:17px; font-weight:600;">Lights</div>
+          <div onClick="{{ toggleAllLights }}" style="padding:9px 14px; border-radius:10px; background:#191d23; border:1px solid rgba(255,255,255,0.08); font-size:13px; cursor:pointer; user-select:none;" style-hover="background:#232830;">{{ allLightsLabel }}</div>
+        </div>
+        <sc-for list="{{ sel.lights }}" as="l" hint-placeholder-count="2">
+          <div style="background:#0e1013; border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:12px;">
+            <div onClick="{{ l.toggle }}" style="display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer; user-select:none;">
+              <div style="display:flex; flex-direction:column; gap:2px;">
+                <div style="font-size:15px; font-weight:500;">{{ l.name }}</div>
+                <div style="font-size:12px; color:{{ l.subColor }};">{{ l.sub }}</div>
+              </div>
+              <div style="{{ l.switchStyle }}"><div style="{{ l.knobStyle }}"></div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="font-size:12px; color:#7d8697; width:30px;">Dim</div>
+              <input type="range" min="1" max="100" value="{{ l.bri }}" onChange="{{ l.setBri }}" aria-label="Brightness" style="flex:1; height:24px; margin:0;">
+              <div style="font-size:12px; color:#7d8697; width:42px; text-align:right;">Bright</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px; padding-top:18px; border-top:1px solid rgba(255,255,255,0.07);">
+        <sc-if value="{{ sel.hasAc }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ toggleAc }}" style="display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer; user-select:none;">
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <div style="font-size:17px; font-weight:600;">Air conditioning</div>
+              <div style="font-size:13px; color:#9aa4b4;">{{ acCaption }}</div>
+            </div>
+            <div style="{{ acSwitchStyle }}"><div style="{{ acKnobStyle }}"></div></div>
+          </div>
+          <div style="{{ acBodyStyle }}">
+            <div style="display:flex; align-items:center; justify-content:center; gap:20px; padding:6px 0;">
+              <div onClick="{{ acDown }}" aria-label="Cooler" style="width:52px; height:52px; border-radius:99px; background:#191d23; border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:24px; cursor:pointer; user-select:none;" style-hover="background:#232830; border-color:rgba(111,168,220,0.6);">−</div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:2px; min-width:100px;">
+                <div style="font-family:'JetBrains Mono',monospace; font-size:40px; font-weight:500; line-height:1;">{{ sel.acSet }}°</div>
+                <div style="font-size:12px; color:#7d8697;">target</div>
+              </div>
+              <div onClick="{{ acUp }}" aria-label="Warmer" style="width:52px; height:52px; border-radius:99px; background:#191d23; border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:24px; cursor:pointer; user-select:none;" style-hover="background:#232830; border-color:rgba(224,139,90,0.6);">+</div>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px; padding-top:14px;">
+              <sc-for list="{{ acModes }}" as="m" hint-placeholder-count="5">
+                <div onClick="{{ m.pick }}" style="{{ m.style }}">{{ m.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ sel.noAc }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:17px; font-weight:600;">Air conditioning</div>
+          <div style="font-size:14px; color:#7d8697;">This room has no air conditioner.</div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px; padding-top:18px; border-top:1px solid rgba(255,255,255,0.07);">
+        <sc-if value="{{ sel.hasFloor }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ toggleFloor }}" style="display:flex; align-items:center; justify-content:space-between; gap:12px; cursor:pointer; user-select:none;">
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <div style="font-size:17px; font-weight:600;">Floor heating</div>
+              <div style="font-size:13px; color:#9aa4b4;">{{ floorCaption }}</div>
+            </div>
+            <div style="{{ floorSwitchStyle }}"><div style="{{ floorKnobStyle }}"></div></div>
+          </div>
+          <div style="{{ floorBodyStyle }}">
+            <div style="display:flex; align-items:center; justify-content:center; gap:20px; padding:6px 0;">
+              <div onClick="{{ floorDown }}" aria-label="Cooler" style="width:52px; height:52px; border-radius:99px; background:#191d23; border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:24px; cursor:pointer; user-select:none;" style-hover="background:#232830; border-color:rgba(224,139,90,0.6);">−</div>
+              <div style="display:flex; flex-direction:column; align-items:center; gap:2px; min-width:100px;">
+                <div style="font-family:'JetBrains Mono',monospace; font-size:40px; font-weight:500; line-height:1;">{{ sel.floorSet }}°</div>
+                <div style="font-size:12px; color:#7d8697;">floor target</div>
+              </div>
+              <div onClick="{{ floorUp }}" aria-label="Warmer" style="width:52px; height:52px; border-radius:99px; background:#191d23; border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:24px; cursor:pointer; user-select:none;" style-hover="background:#232830; border-color:rgba(224,139,90,0.6);">+</div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ sel.noFloor }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:17px; font-weight:600;">Floor heating</div>
+          <div style="font-size:14px; color:#7d8697;">This room has no floor heating.</div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1080}}">
+const AMBER = "#e6b45c", COOL = "#6fa8dc", WARM = "#e08b5a";
+
+class Component extends DCLogic {
+  state = {
+    layer: "light",
+    sel: "17-1",
+    scene: null,
+    rooms: [
+      { code:"17-1", name:"Living Room", x:226, y:33, w:213, h:293, area:17.4,
+        temp:23.4, hum:44, ac:{on:true, mode:"Cool", set:23},
+        floor:null, lights:[{name:"Ceiling spots", on:true, bri:70},{name:"Sofa floor lamp", on:true, bri:35},{name:"TV backlight", on:false, bri:20}], base:180 },
+      { code:"17-2", name:"Bedroom", annex:{x:14, y:213, w:108, h:43}, x:14, y:33, w:212, h:180, area:13.2,
+        temp:22.1, hum:47, ac:{on:false, mode:"Auto", set:21},
+        floor:null, lights:[{name:"Ceiling", on:false, bri:60},{name:"Bedside pair", on:true, bri:22}], base:40 },
+      { code:"17-3", name:"Kitchen", x:216, y:326, w:267, h:140, area:10.4,
+        temp:23.9, hum:51, ac:null,
+        floor:{on:true, set:24, temp:25.6}, lights:[{name:"Worktop strip", on:true, bri:85},{name:"Island pendants", on:true, bri:60}], base:310 },
+      { code:"17-4", name:"Bathroom", x:14, y:256, w:108, h:156, area:4.7,
+        temp:24.6, hum:63, ac:null,
+        floor:{on:true, set:27, temp:27.4}, lights:[{name:"Mirror light", on:false, bri:80},{name:"Ceiling", on:false, bri:100}], base:60 },
+      { code:"17-5", name:"Hallway", x:122, y:213, w:94, h:235, area:5.0,
+        temp:22.8, hum:46, ac:null,
+        floor:{on:false, set:22, temp:22.4}, lights:[{name:"Hall downlights", on:true, bri:45}], base:12 },
+      { code:"17-6", name:"Loggia", annex:{x:483, y:326, w:55, h:100}, x:439, y:87, w:99, h:239, area:9.3,
+        temp:19.7, hum:55, ac:null,
+        floor:null, lights:[{name:"Loggia strip", on:false, bri:50}], base:520 }
+    ],
+    bars: [210,190,180,175,170,180,240,430,620,540,380,340,520,470,410,390,430,610,880,940,760,600,430,310],
+    now: new Date(),
+    w: typeof window !== "undefined" ? window.innerWidth : 1440
+  };
+
+  componentDidMount() {
+    this.tick = setInterval(() => this.setState({ now: new Date() }), 30000);
+    const el = this.rootRef.current;
+    if (el && window.ResizeObserver) {
+      this.ro = new ResizeObserver(e => { const w = Math.round(e[0].contentRect.width); if (w !== this.state.w) this.setState({ w }); });
+      this.ro.observe(el);
+    }
+  }
+  componentWillUnmount() { clearInterval(this.tick); if (this.ro) this.ro.disconnect(); }
+
+  rootRef = React.createRef();
+  roomRef = React.createRef();
+
+  pick(code) {
+    this.setState({ sel: code });
+    if (this.state.w < 820 && this.roomRef.current) {
+      const y = this.roomRef.current.getBoundingClientRect().top + window.scrollY - 8;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }
+
+  roomPower(r) {
+    let p = r.base;
+    r.lights.forEach(l => { if (l.on) p += 6 + l.bri * 0.14; });
+    if (r.ac && r.ac.on) p += r.ac.mode === "Fan" ? 55 : 780;
+    if (r.floor && r.floor.on) p += Math.round(r.area * 85);
+    return Math.round(p);
+  }
+
+  update(fn) {
+    this.setState(s => ({ rooms: s.rooms.map(r => r.code === s.sel ? fn(JSON.parse(JSON.stringify(r))) : r), scene: null }));
+  }
+
+  sw(on, color) {
+    return "flex:none; width:52px; height:30px; border-radius:99px; padding:3px; box-sizing:border-box; cursor:pointer; transition:background .18s; display:flex; justify-content:" +
+      (on ? "flex-end" : "flex-start") + "; background:" + (on ? color : "rgba(255,255,255,0.16)") + ";";
+  }
+  knob(on) {
+    return "width:24px; height:24px; border-radius:99px; background:" + (on ? "#12141a" : "#e9ecf1") + "; box-shadow:0 1px 3px rgba(0,0,0,.5);";
+  }
+  tab(active) {
+    return "flex:none; white-space:nowrap; min-height:40px; box-sizing:border-box; display:flex; align-items:center; padding:0 14px; border-radius:9px; font-size:13px; font-weight:500; cursor:pointer; user-select:none; color:" +
+      (active ? "#12141a" : "#aab2c0") + "; background:" + (active ? "#e9ecf1" : "transparent") + ";";
+  }
+  mix(a, b, t) {
+    const p = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+    const [r1,g1,b1] = p(a), [r2,g2,b2] = p(b);
+    const c = (x,y) => Math.round(x + (y - x) * Math.max(0, Math.min(1, t))).toString(16).padStart(2,"0");
+    return "#" + c(r1,r2) + c(g1,g2) + c(b1,b2);
+  }
+
+  fillFor(r) {
+    const L = this.state.layer;
+    if (L === "light") {
+      const on = r.lights.filter(l => l.on);
+      if (!on.length) return "#1b1f26";
+      const bri = on.reduce((a,l) => a + l.bri, 0) / on.length;
+      return this.mix("#1b1f26", "#e6b45c", 0.18 + bri / 190);
+    }
+    if (L === "climate") return this.mix("#3d6a92", "#8a4a35", (r.temp - 19) / 6);
+    if (L === "floor") {
+      if (!r.floor) return "#1b1f26";
+      return r.floor.on ? this.mix("#2a2118", "#e08b5a", (r.floor.temp - 21) / 8) : "#221c19";
+    }
+    return this.mix("#1b1f26", "#4f7a63", this.roomPower(r) / 1400);
+  }
+
+  rect(x, y, w, h) {
+    return " left:" + (x / 600 * 100).toFixed(3) + "%; top:" + (y / 500 * 100).toFixed(3) + "%;" +
+      " width:" + (w / 600 * 100).toFixed(3) + "%; height:" + (h / 500 * 100).toFixed(3) + "%;";
+  }
+
+  roomBox(r, active, geo) {
+    const g = geo || r;
+    const f = this.fillFor(r);
+    return "position:absolute; z-index:1; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; cursor:pointer; padding:clamp(3px,1.6cqw,10px); overflow:hidden; transition:background .25s, box-shadow .2s;" +
+      this.rect(g.x, g.y, g.w, g.h) + " background:" + f + ";" +
+      (active ? " box-shadow: inset 0 0 0 clamp(5px,1.6cqw,9px) " + f + ", inset 0 0 0 calc(clamp(5px,1.6cqw,9px) + 3px) " + AMBER + ";" : "");
+  }
+
+  metricFor(r) {
+    const L = this.state.layer;
+    if (L === "light") { const n = r.lights.filter(l => l.on).length; return n ? n + " on" : "off"; }
+    if (L === "climate") return r.temp.toFixed(1) + "°";
+    if (L === "floor") return r.floor ? (r.floor.on ? r.floor.temp.toFixed(1) + "°" : "off") : "—";
+    return this.roomPower(r) + " W";
+  }
+
+  dotFor(r) {
+    const n = r.lights.filter(l => l.on).length;
+    return n ? AMBER : (r.ac && r.ac.on ? COOL : (r.floor && r.floor.on ? WARM : "#3a4049"));
+  }
+
+  renderVals() {
+    const S = this.state;
+    const sel = S.rooms.find(r => r.code === S.sel) || S.rooms[0];
+    const total = S.rooms.reduce((a, r) => a + this.roomPower(r), 0);
+    const bars = S.bars.slice(0, 23).concat([total]);
+    const maxBar = Math.max.apply(null, bars);
+    const pad = n => String(n).padStart(2, "0");
+    const now = S.now, hr = now.getHours();
+
+    const rooms = S.rooms.map(r => {
+      const active = r.code === S.sel;
+      const f = this.fillFor(r);
+      const lum = parseInt(f.slice(1,3),16)*0.299 + parseInt(f.slice(3,5),16)*0.587 + parseInt(f.slice(5,7),16)*0.114;
+      const bright = lum > 140;
+      return {
+        name: r.name, ink: bright ? "#14171c" : "#f2f4f7", inkSoft: bright ? "#2a2f38" : "#c2cad6",
+        badges: [r.lights.some(l => l.on) ? AMBER : null, r.ac && r.ac.on ? COOL : null, r.floor && r.floor.on ? WARM : null].filter(Boolean).map(c => ({ c })),
+        boxStyle: this.roomBox(r, active), metric: this.metricFor(r),
+        select: () => this.pick(r.code)
+      };
+    });
+
+    const roomTabs = S.rooms.map(r => {
+      const active = r.code === S.sel;
+      return {
+        name: r.name, dot: this.dotFor(r), select: () => this.setState({ sel: r.code }),
+        style: "flex:none; white-space:nowrap; min-height:44px; box-sizing:border-box; display:flex; align-items:center; gap:8px; padding:0 16px; border-radius:99px; font-size:14px; font-weight:500; cursor:pointer; user-select:none; transition:background .15s;" +
+          (active ? " background:#e9ecf1; color:#12141a; border:1px solid #e9ecf1;" : " background:#191d23; color:#d4d9e1; border:1px solid rgba(255,255,255,0.08);")
+      };
+    });
+
+    const annexes = S.rooms.filter(r => r.annex).map(r => ({
+      style: this.roomBox(r, r.code === S.sel, r.annex), select: () => this.pick(r.code)
+    }));
+
+    const WALLS = [
+      [7.5,26.5,438,13],[7.5,26.5,13,236],[7.5,249.5,13,169],[7.5,405.5,121,13],
+      [115.5,405.5,13,49],[115.5,441.5,107,13],[209.5,441.5,13,31],[209.5,459.5,280,13],
+      [476.5,419.5,13,53],[476.5,419.5,68,13],[531.5,80.5,13,352],[432.5,80.5,112,13],[432.5,26.5,13,67],
+      [222.5,29.5,7,187],[212.5,206.5,17,55.5],[212.5,308,17,21.5],
+      [7.5,249.5,124,13],[118.5,209.5,39.5,7],[208,209.5,21.5,7],
+      [115.5,206.5,13,93.5],[115.5,346,13,72.5],
+      [212.5,326,7,34],[212.5,406,7,45.5],
+      [212.5,322.5,230,7],
+      [435.5,322.5,51,7],
+      [435.5,83.5,7,66.5],[435.5,196,7,133.5],
+      [479.5,322.5,7,37.5],[479.5,406,7,23.5]
+    ];
+    const wallSegs = WALLS.map(w => ({ style: "position:absolute; z-index:3; background:#dfe4ec;" + this.rect(w[0], w[1], w[2], w[3]) }));
+
+    const legend = {
+      light: ["off", "bright", "linear-gradient(90deg,#1b1f26,#e6b45c)"],
+      climate: ["cool 19°", "warm 25°", "linear-gradient(90deg,#3d6a92,#8a4a35)"],
+      floor: ["off", "29°", "linear-gradient(90deg,#221c19,#e08b5a)"],
+      power: ["low", "high", "linear-gradient(90deg,#1b1f26,#4f7a63)"]
+    }[S.layer];
+
+    const scenes = [
+      { name:"Good morning", desc:"Lights on, bedroom stays dark, floors warm" },
+      { name:"Evening", desc:"Soft 30% lights, AC to 23°" },
+      { name:"Away", desc:"Everything off, heating on low" },
+      { name:"Night", desc:"Dim hallway light, bedroom AC only" }
+    ].map(s => {
+      const on = S.scene === s.name;
+      return { ...s, badge: on ? "Active" : "",
+        style: "display:flex; flex-direction:column; gap:6px; padding:16px; border-radius:14px; cursor:pointer; user-select:none; transition:border-color .15s, background .15s; background:" +
+          (on ? "#221f19" : "#14171c") + "; border:1px solid " + (on ? "rgba(230,180,92,0.6)" : "rgba(255,255,255,0.07)") + ";",
+        run: () => this.runScene(s.name) };
+    });
+
+    const circuits = [
+      { name:"Lights", w: S.rooms.reduce((a,r) => a + r.lights.reduce((b,l) => b + (l.on ? 6 + l.bri*0.14 : 0), 0), 0), color: AMBER },
+      { name:"AC", w: S.rooms.reduce((a,r) => a + (r.ac && r.ac.on ? (r.ac.mode === "Fan" ? 55 : 780) : 0), 0), color: COOL },
+      { name:"Floor heating", w: S.rooms.reduce((a,r) => a + (r.floor && r.floor.on ? r.area*85 : 0), 0), color: WARM },
+      { name:"Sockets", w: S.rooms.reduce((a,r) => a + r.base, 0), color: "#8fbfa4" }
+    ].map(c => ({ ...c, w: Math.round(c.w) }));
+    const cMax = Math.max.apply(null, circuits.map(c => c.w)) || 1;
+    circuits.forEach(c => { c.share = (c.w / cMax * 100).toFixed(1) + "%"; });
+
+    const acOn = !!(sel.ac && sel.ac.on);
+    const floorOn = !!(sel.floor && sel.floor.on);
+    const litCount = sel.lights.filter(l => l.on).length;
+    const acCap = !sel.ac ? "" : !acOn ? "Off" : ({
+      Cool: "Cooling to " + sel.ac.set + "°", Heat: "Heating to " + sel.ac.set + "°",
+      Dry: "Drying the air", Fan: "Fan only", Auto: "Keeping the room at " + sel.ac.set + "°"
+    })[sel.ac.mode];
+    const kwh = bars.reduce((a,b) => a+b, 0) / 1000;
+
+    const narrow = S.w < 820;
+    return {
+      rootRef: this.rootRef, roomRef: this.roomRef,
+      pagePad: narrow ? "16px 14px calc(32px + env(safe-area-inset-bottom))" : "24px 28px 40px",
+      cardPad: narrow ? "16px" : "20px", gap: narrow ? "14px" : "20px",
+      fillFlex: narrow ? "1 1 100%" : "0 1 auto",
+      gridCols: narrow ? "minmax(0,1fr)" : "minmax(0,1.15fr) minmax(360px,1fr)",
+      gridRows: narrow ? "auto" : "auto 1fr",
+      gridAreas: narrow ? '"plan" "room" "energy"' : '"plan room" "energy room"',
+      rooms, roomTabs, scenes, circuits, wallSegs, annexes,
+      greeting: hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening",
+      clock: pad(hr) + ":" + pad(now.getMinutes()),
+      dateLabel: now.toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long" }),
+      avgTemp: (S.rooms.reduce((a,r) => a + r.temp, 0) / S.rooms.length).toFixed(1),
+      lightsOn: S.rooms.reduce((a,r) => a + r.lights.filter(l => l.on).length, 0),
+      lightsTotal: S.rooms.reduce((a,r) => a + r.lights.length, 0),
+      totalPowerKw: (total / 1000).toFixed(2),
+      kwhToday: kwh.toFixed(1), costToday: (kwh * 0.28).toFixed(2),
+      peakPower: maxBar,
+      bars: bars.map((v,i) => ({ tip: (i === bars.length-1 ? "Now" : pad(i) + ":00") + " · " + v + " W", h: Math.round(v / maxBar * 100) + "%", color: i === bars.length-1 ? AMBER : "rgba(230,180,92,0.35)" })),
+      legendLow: legend[0], legendHigh: legend[1], legendGradient: legend[2],
+      tabLight: this.tab(S.layer === "light"), tabClimate: this.tab(S.layer === "climate"),
+      tabFloor: this.tab(S.layer === "floor"), tabPower: this.tab(S.layer === "power"),
+      setLayerLight: () => this.setState({ layer:"light" }),
+      setLayerClimate: () => this.setState({ layer:"climate" }),
+      setLayerFloor: () => this.setState({ layer:"floor" }),
+      setLayerPower: () => this.setState({ layer:"power" }),
+      allLightsOff: () => this.setState(s => ({ scene: null, rooms: s.rooms.map(r => ({ ...r, lights: r.lights.map(l => ({ ...l, on: false })) })) })),
+
+      sel: {
+        name: sel.name, temp: sel.temp.toFixed(1),
+        statusLine: (litCount ? litCount + " of " + sel.lights.length + " lights on" : "Lights off") + " · humidity " + sel.hum + "% · " + this.roomPower(sel) + " W",
+        hasAc: !!sel.ac, noAc: !sel.ac, hasFloor: !!sel.floor, noFloor: !sel.floor,
+        acSet: sel.ac ? sel.ac.set : 0, floorSet: sel.floor ? sel.floor.set : 0,
+        lights: sel.lights.map((l, i) => ({
+          name: l.name, bri: l.bri,
+          sub: l.on ? "On · " + l.bri + "%" : "Off", subColor: l.on ? AMBER : "#7d8697",
+          switchStyle: this.sw(l.on, AMBER), knobStyle: this.knob(l.on),
+          toggle: () => this.update(r => { r.lights[i].on = !r.lights[i].on; return r; }),
+          setBri: e => { const v = +e.target.value; this.update(r => { r.lights[i].bri = v; r.lights[i].on = true; return r; }); }
+        }))
+      },
+      allLightsLabel: litCount ? "Turn all off" : "Turn all on",
+      toggleAllLights: () => this.update(r => { const on = !r.lights.some(l => l.on); r.lights.forEach(l => l.on = on); return r; }),
+
+      acSwitchStyle: this.sw(acOn, COOL), acKnobStyle: this.knob(acOn), acCaption: acCap,
+      acBodyStyle: "display:flex; flex-direction:column; transition:opacity .2s; opacity:" + (acOn ? 1 : 0.45) + ";",
+      toggleAc: () => this.update(r => { r.ac.on = !r.ac.on; return r; }),
+      acUp: () => this.update(r => { r.ac.set = Math.min(30, r.ac.set + 1); r.ac.on = true; return r; }),
+      acDown: () => this.update(r => { r.ac.set = Math.max(16, r.ac.set - 1); r.ac.on = true; return r; }),
+      acModes: ["Cool","Heat","Dry","Fan","Auto"].map(m => {
+        const on = acOn && sel.ac.mode === m;
+        return { label: m, pick: () => this.update(r => { r.ac.mode = m; r.ac.on = true; return r; }),
+          style: "text-align:center; padding:12px 0; border-radius:10px; font-size:13px; font-weight:500; cursor:pointer; user-select:none; color:" +
+            (on ? "#0e1013" : "#c2cad6") + "; background:" + (on ? COOL : "#191d23") + "; border:1px solid " + (on ? COOL : "rgba(255,255,255,0.08)") + ";" };
+      }),
+
+      floorSwitchStyle: this.sw(floorOn, WARM), floorKnobStyle: this.knob(floorOn),
+      floorCaption: !sel.floor ? "" : floorOn ? "Floor is " + sel.floor.temp.toFixed(1) + "° · heating to " + sel.floor.set + "°" : "Off · floor is " + sel.floor.temp.toFixed(1) + "°",
+      floorBodyStyle: "transition:opacity .2s; opacity:" + (floorOn ? 1 : 0.45) + ";",
+      toggleFloor: () => this.update(r => { r.floor.on = !r.floor.on; return r; }),
+      floorUp: () => this.update(r => { r.floor.set = Math.min(32, r.floor.set + 1); r.floor.on = true; return r; }),
+      floorDown: () => this.update(r => { r.floor.set = Math.max(18, r.floor.set - 1); r.floor.on = true; return r; })
+    };
+  }
+
+  runScene(name) {
+    this.setState(s => {
+      const rooms = JSON.parse(JSON.stringify(s.rooms));
+      rooms.forEach(r => {
+        if (name === "Away") {
+          r.lights.forEach(l => l.on = false);
+          if (r.ac) r.ac.on = false;
+          if (r.floor) { r.floor.on = true; r.floor.set = 19; }
+        } else if (name === "Night") {
+          r.lights.forEach(l => l.on = false);
+          if (r.code === "17-5") { r.lights[0].on = true; r.lights[0].bri = 10; }
+          if (r.ac) { r.ac.on = r.code === "17-2"; r.ac.set = 22; }
+          if (r.floor) r.floor.set = 22;
+        } else if (name === "Evening") {
+          r.lights.forEach(l => { l.on = true; l.bri = 30; });
+          if (r.ac) { r.ac.on = true; r.ac.set = 23; r.ac.mode = "Cool"; }
+          if (r.floor) { r.floor.on = true; r.floor.set = 25; }
+        } else {
+          r.lights.forEach(l => { l.on = r.code !== "17-2"; l.bri = 80; });
+          if (r.ac) r.ac.on = false;
+          if (r.floor) { r.floor.on = true; r.floor.set = 24; }
+        }
+      });
+      return { rooms, scene: name };
+    });
+  }
+}
+</script>
+</body>
+</html>
