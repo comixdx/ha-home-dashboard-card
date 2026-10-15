@@ -16,6 +16,30 @@ views:
         # cost_entity: sensor.energy_cost_today       # optional; otherwise price × kWh
         price: 1.10                                   # per kWh, in your HA currency
         walls: design
+        color_mode: sun          # dark | light | auto (follow device) | sun (dark after sunset)
+        weather_entity: weather.home
+        # outdoor_temperature: sensor.balcony_temperature   # overrides the weather entity
+        # outdoor_humidity: sensor.balcony_humidity
+        calendars: [calendar.family]
+        media_players: [media_player.living_room, media_player.kitchen]
+        favorites:                                    # shown only while their conditions hold
+          - entity: fan.bedroom
+            conditions:
+              - or:
+                  - { entity: sensor.bedroom_temperature, above: 24 }
+                  - active
+          - entity: switch.oven
+            name: Oven
+            icon: mdi:stove
+            conditions: [active]
+          - entity: vacuum.robot
+            conditions: [active]
+          - entity: script.dinner_recipe
+            name: Tonight's dinner
+            icon: mdi:silverware-fork-knife
+            conditions:
+              - { after: "14:00", before: "21:00" }
+              - { entity: input_text.dinner, state_not: ["", "unknown"] }
         scenes:
           - entity: scene.good_morning
             description: Lights on, bedroom stays dark, floors warm
@@ -42,6 +66,7 @@ views:
             humidity: sensor.living_room_humidity
             power: sensor.living_room_power
             climate: climate.living_room_ac
+            window: binary_sensor.living_room_window
             lights:
               - light.living_room_ceiling_spots
               - light.living_room_sofa_lamp
@@ -54,6 +79,7 @@ views:
             temperature: sensor.bedroom_temperature
             humidity: sensor.bedroom_humidity
             climate: climate.bedroom_ac
+            window: [binary_sensor.bedroom_window]
             lights: [light.bedroom_ceiling, light.bedroom_bedside]
           - name: Kitchen
             area: kitchen
@@ -67,6 +93,7 @@ views:
             plan: { x: 14, y: 256, w: 108, h: 156 }
             temperature: sensor.bathroom_temperature
             humidity: sensor.bathroom_humidity
+            window: binary_sensor.bathroom_window
             floor_heating: climate.bathroom_floor
             lights: [light.bathroom_mirror, light.bathroom_ceiling]
           - name: Hallway
